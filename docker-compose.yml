@@ -1,0 +1,17 @@
+version: "2.0"
+services:
+    gitlab_app:
+        image: threatworx/gitlab_app_server:latest
+        container_name: threatworx_gitlab_app
+        ports:
+            - 443:443
+        volumes:
+            - ./config:/opt/tw_gitlab_app/config
+        restart: on-failure:2
+    watchtower:
+        image: containrrr/watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        command: --interval 86400 --cleanup --remove-volumes --debug threatworx_gitlab_app
+        depends_on: 
+            - gitlab_app

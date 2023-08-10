@@ -1,0 +1,43 @@
+[threatworx]
+# ThreatWorx instance FQDN
+instance=YOUR_TW_INSTANCE
+
+# ThreatWorx user email or handle
+handle=YOUR_TW_HANDLE
+
+# ThreatWorx user API key# 
+token=YOUR_TW_API_KEY
+
+[bitbucket_app]
+# Point this to your Bitbucket cloud service 
+bitbucket_host = bitbucket.org
+
+# Specify user depending on type of authentication
+bitbucket_user = x-token-auth
+
+# Depending on type of authentication to be used this could be
+# {Repository / Project / Workspace} Access Token
+bitbucket_access_token = BITBUCKET_ACCESS_TOKEN 
+
+# Used to tag repository assets reported to ThreatWorx console upon discovery
+user_tags = 
+
+# Enable / disable discovery of repositories as assets in ThreatWorx console
+base_discovery_enabled = true
+
+# Enable / disable sast checks on repositories
+sast_checks_enabled = false
+
+# Enable / disable IaC checks on repositories
+iac_checks_enabled = false
+
+# Enable / disable secrets checks on repositories
+secrets_checks_enabled = false
+
+# Allow sharing of code snippets related to code / IaC checks to the ThreatWorx console
+code_sharing = false
+
+# App internal settings. Typically you don't need to modify these
+discovery_concurrency = 4
+setup_done = false 
+

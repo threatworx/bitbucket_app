@@ -1,0 +1,69 @@
+#!/usr/bin/python3 -u 
+
+import os
+import sys
+import getopt
+import json
+
+import utils
+
+def usage():
+    print("Usage is push_request_handler [-f <path_to_event_data_json_file>]")
+
+os.nice(19)
+pid = os.getpid()
+
+json_file_name = None
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], 'f:', ['file'])
+except getopt.GetoptError:
+    usage()
+    sys.exit(2)
+for opt, arg in opts:
+    if opt in ('-h', '--help'):
+        usage()
+        sys.exit(1)
+    elif opt in ('-f', '--file'):
+        json_file_name = arg
+    else:
+        usage()
+        sys.exit(2)
+
+if json_file_name is None:
+    print("Required argument [file] is missing")
+    usage()
+    sys.exit(1)
+
+event_data = None
+with open(json_file_name, 'r') as fd:
+    event_data = json.load(fd)
+
+# if repo branch is deleted then "new" is null in payload
+base_branch = None
+for change in event_data['push']['changes']:
+    if change['new'] is not None:
+        if change['new']['type'] == "branch" and change['new']['name'] in ['master', 'main']:
+            base_branch = change['new']['name']
+
+if base_branch is None:
+    os.remove(json_file_name)
+    sys.exit(1)
+
+repo_url = event_data['repository']['links']['html']['href']
+repo_full_name = event_data['repository']['full_name']
+asset_id = repo_full_name.replace('/','_')
+
+print("Handling push webhook for repo [%s]" % repo_full_name)
+
+# Discover and scan asset
+ret_val = utils.discover_repo(repo_url, asset_id, base_branch) 
+
+if ret_val == False:
+    print("Error while discovering asset for branch [%s]" % base_branch)
+    os.remove(json_file_name)
+    sys.exit(1)
+
+# Delete the event_data json file
+os.remove(json_file_name)
+
