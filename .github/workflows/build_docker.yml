@@ -2,9 +2,7 @@
 
 name: bitbucket app docker image build
 
-on:
-  schedule:
-    - cron: "0 * * * *"
+on: push
 
 jobs:
   build:
