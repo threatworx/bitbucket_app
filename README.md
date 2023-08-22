@@ -1,3 +1,5 @@
+[![bitbucket app docker image build](https://github.com/threatworx/bitbucket_app/actions/workflows/build_docker.yml/badge.svg)](https://github.com/threatworx/bitbucket_app/actions/workflows/build_docker.yml)
+
 # ThreatWorx Bitbucket App
 
 ## _Zero Trust Automated AppSec for Bitbucket Cloud_
