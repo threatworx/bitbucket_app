@@ -1,6 +1,6 @@
 # Build latest container image
 
-name: github app docker image build
+name: bitbucket app docker image build
 
 on:
   schedule:
@@ -25,4 +25,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: threatworx/github_app_server:latest
+          tags: threatworx/bitbucket_app_server:latest
