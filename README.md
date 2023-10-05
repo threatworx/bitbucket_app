@@ -1,3 +1,5 @@
+[![bitbucket app docker image build](https://github.com/threatworx/bitbucket_app/actions/workflows/build_docker.yml/badge.svg)](https://github.com/threatworx/bitbucket_app/actions/workflows/build_docker.yml)
+
 # ThreatWorx Bitbucket App
 
 ## _Zero Trust Automated AppSec for Bitbucket Cloud_
@@ -25,23 +27,6 @@ A complete automated AppSec solution part of the ThreatWorx proactive security p
 - Please specify 'Scope' as 'Repositories -> Read' for the access token
 
 - Remember to copy / store the access token for use later when configuring the app server
-
-## Setup Bitbucket Cloud webhook
-
-- The app uses Bitbucket Cloud webhook to receive events such as a repostory push
-
-- To setup a webhook go to your `Repository->Repository settings->Webhooks`
-
-- Set an appropriate 'Title'
-
-- Set the URL for the webhook to `https://<your app server>/webhook`
-
-
-- Select `Push` event under `Repository` as the trigger
-
-- If you are using self signed SSL certificates, you can check `Skip certificate verification`
-
-- Secure your webhook by ensuring that only Bitbucket IPs can comminucate with it [(learn more)](https://support.atlassian.com/bitbucket-cloud/docs/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall/)
 
 ## Install and configure the App Service
 
@@ -92,3 +77,21 @@ docker compose up -d
 > App will initially do a complete dependency vulnerability scan for all selected repositories
 >
 > After that, any push will trigger a rescan of the change that is committed
+
+## Setup Bitbucket Cloud webhook
+
+- The app uses Bitbucket Cloud webhook to receive events such as a repostory push
+
+- To setup a webhook go to your `Repository->Repository settings->Webhooks`
+
+- Set an appropriate 'Title'
+
+- Set the URL for the webhook to `https://<your app server>/webhook`
+
+
+- Select `Push` event under `Repository` as the trigger
+
+- If you are using self signed SSL certificates, you can check `Skip certificate verification`
+
+- Secure your webhook by ensuring that only Bitbucket IPs can comminucate with it [(learn more)](https://support.atlassian.com/bitbucket-cloud/docs/what-are-the-bitbucket-cloud-ip-addresses-i-should-use-to-configure-my-corporate-firewall/)
+
