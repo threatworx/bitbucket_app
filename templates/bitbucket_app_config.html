@@ -325,6 +325,30 @@
                         background-color: #3e8e41;
                 }
 
+                .button-10 {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 6px 14px;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+                    border-radius: 6px;
+                    border: none;
+
+                    color: #fff;
+                    background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+                     background-origin: border-box;
+                    box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+                    user-select: none;
+                    -webkit-user-select: none;
+                    touch-action: manipulation;
+                  }
+
+                  .button-10:focus {
+                    box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+                    outline: 0;
+                  }
+
+
 		.help-block {
                     display: block;
                     margin-top: 5px;
@@ -363,29 +387,94 @@
     <input type="checkbox" name="show_api_key" onclick="toggle_api_key()">Show</input>
     <span class="help-block">API key for ThreatWorx user</span>
 </div>
-
 <br>
+
+<div class="form-group" id="dynamic_input">
+    <label for="Bitbucket">Bitbucket Settings</label>
+    <br>
+    <button class="button-10" onclick="add_cred_div()">+ Add New</button>
+    <br>
+</div>
+
 <div class="form-group">
     <label for="Service">App Settings</label>
     <br>
     <div>
-        <label><input type="checkbox" name="sast_enabled" value="yes" > Enable SAST checks</label>
-        <label><input type="checkbox" name="iac_enabled" value="yes" > Enable IaC checks</label>
-        <label><input type="checkbox" name="secrets_enabled" value="yes" > Enable code secrets checks</label>
+        <label><input type="checkbox" name="sast_enabled" value="yes" checked> Enable SAST checks</label>
+        <label><input type="checkbox" name="iac_enabled" value="yes" checked> Enable IaC checks</label>
+        <label><input type="checkbox" name="secrets_enabled" value="yes" checked> Enable code secrets checks</label>
         <label><input type="checkbox" name="code_sharing_enabled" value="yes" checked> Share code snippets with ThreatWorx Console as part of findings </label>
         <input type="text" placeholder="User defined asset tags" name="tw_user_tags" id="tw_user_tags" value="">
 	<span class="help-block">Optional comma separated tags you want to assign to discovered assets for search and access control<br>Assets will be auto tagged with Bitbucket workspace name</span>
-        <input type="password" placeholder="Bitbucket access token" name="tw_bb_access_token" id="tw_bb_access_token" required>
-        <input type="checkbox" name="show_access_token" onclick="toggle_access_token()">Show</input>
-        <span class="help-block">Access token for repository, project, or workspace</span>
     </div>
 </div>
 <!--<button class="btn" onclick="button_clicked()"><strong>Configure</strong></button>-->
 <button type="submit" class="btn">Configure</button>
 </form>
 </div>
-
         <script>
+        window.onload = add_cred_div;
+
+	function add_cred_div() {
+	    fieldnum = makeid(7);
+            var x = document.getElementById("dynamic_input");
+	    var divnode = document.createElement('div');
+            divnode.setAttribute('class','container');
+	    divnode.setAttribute('id', 'dcontainer_'+fieldnum)
+
+	    var nmnode = document.createElement('input');
+            nmnode.setAttribute('id','token_name_'+fieldnum);
+            nmnode.setAttribute('name','token_name_'+fieldnum);
+            nmnode.setAttribute('type','text');
+            nmnode.setAttribute('placeholder','Access token name or identifier');
+            nmnode.setAttribute('required','');
+            nmnode.setAttribute('oninput','check_dups(this)');
+	    divnode.appendChild(nmnode);
+
+	    var sp1 = document.createElement('span');
+            sp1.setAttribute('class','help-block');
+            sp1.textContent = 'A friendly, unique name for the access token';
+	    divnode.appendChild(sp1);
+
+	    var atnode = document.createElement('input');
+            atnode.setAttribute('id','token_value_'+fieldnum);
+            atnode.setAttribute('name','token_value_'+fieldnum);
+            atnode.setAttribute('type','password');
+            atnode.setAttribute('placeholder','Access token');
+            atnode.setAttribute('required','');
+	    divnode.appendChild(atnode);
+
+	    var atcb = document.createElement('input');
+            atcb.setAttribute('type','checkbox');
+            atcb.setAttribute('onclick','toggle_access_token_id("token_value_'+fieldnum+'")');
+	    atcb.textContent = "Show"
+	    divnode.appendChild(atcb);
+
+	    var spanode = document.createElement('span');
+            spanode.setAttribute('class','help-block');
+            spanode.textContent = 'Access token for repository, project, or workspace';
+	    divnode.appendChild(spanode);
+
+	    var rbutton = document.createElement('button');
+            rbutton.setAttribute('id','rbutton_'+fieldnum);
+            rbutton.setAttribute('class','button-10');
+            rbutton.setAttribute('onclick','remove_cred_div("dcontainer_'+fieldnum+'")');
+	    rbutton.textContent = "Remove"
+	    divnode.appendChild(rbutton);
+
+	    x.appendChild(divnode);
+
+	    var br = document.createElement("br");
+	    x.appendChild(br);
+	}
+
+        function remove_cred_div(div_id) {
+            var parentDiv = document.getElementById("dynamic_input");
+            var cdiv = document.getElementById(div_id);
+	    parentDiv.removeChild(cdiv);
+	    check_dups();
+	}
+
         function toggle_api_key() {
             var x = document.getElementById("tw_api_key");
             if (x.type === "password") {
@@ -394,14 +483,16 @@
               x.type = "password";
             }
         } 
-        function toggle_access_token() {
-            var x = document.getElementById("tw_bb_access_token")
+
+        function toggle_access_token_id(token_id) {
+            var x = document.getElementById(token_id)
             if (x.type === "password") {
               x.type = "text";
             } else {
               x.type = "password";
             }
         }        
+
         function toggle_webhook_secret() {
             var x = document.getElementById("tw_gl_webhook_secret")
             if (x.type === "password") {
@@ -410,8 +501,37 @@
               x.type = "password";
             }
         }        
-        </script>
 
+        function check_dups() {
+		elements = document.querySelectorAll('*[id^="token_name"]');
+                for (i = 0; i < elements.length; i++) {
+                    for (j = i + 1; j < elements.length; j++) {
+                        if (i == j || elements[i].value == "" || elements[j].value == "")
+                            continue;
+                        if (elements[i].value == elements[j].value) {
+			    elements[i].style.color = 'red';
+			    elements[j].style.color = 'red';
+                        }
+	                else {
+			    elements[i].style.color = 'black';
+			    elements[j].style.color = 'black';
+		        }
+                    }
+                }
+	}
+
+        function makeid(length) {
+            let result = '';
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const charactersLength = characters.length;
+            let counter = 0;
+            while (counter < length) {
+              result += characters.charAt(Math.floor(Math.random() * charactersLength));
+              counter += 1;
+            }
+            return result;
+        }
+        </script>
 
 <div xmlns="" class="clear"></div>
 

@@ -7,6 +7,7 @@ import time
 import uuid
 import tempfile
 import json
+from filelock import FileLock
 
 config = None
 GoDaddyCABundle = True
@@ -31,18 +32,90 @@ def get_config(force_read = False):
         print("Error configuration file [%s] not found" % CONFIG_FILE)
         sys.exit(1)
     config = configparser.ConfigParser()
-    config.read(CONFIG_FILE)
+    lock = FileLock(CONFIG_FILE + ".lock")
+    with lock:
+        config.read(CONFIG_FILE)
     return config
 
 def write_config(config):
-    with open(CONFIG_FILE, 'w') as fd:
-        config.write(fd)
+    lock = FileLock(CONFIG_FILE + ".lock")
+    with lock:
+        with open(CONFIG_FILE, 'w') as fd:
+            config.write(fd)
 
-def discover_repo(repo_url, asset_id, branch):
+def update_access_token_cache(at_index, access_token):
+    lock = FileLock(CONFIG_FILE + ".lock")
+    with lock:
+        config = get_config(True)
+        config['bitbucket_tokens_cache'][at_index] = access_token
+        write_config(config)
+
+def check_access_token(repo_url, bitbucket_access_token):
+    config = get_config()
+    bitbucket_user = config['bitbucket_app']['bitbucket_user']
+    updated_repo_url = "https://" + bitbucket_user + ":" + bitbucket_access_token + '@' + repo_url.split('//')[1]
+
+    # Run base asset discovery
+    git_cmd = "git ls-remote %s" % updated_repo_url
+    dev_null_device = open(os.devnull, "w")
+    try:
+        process = subprocess.run([git_cmd], stdout=dev_null_device, stderr=dev_null_device, shell=True)
+        if process.returncode == 0:
+            return True
+        return False
+    except subprocess.CalledProcessError as e:
+        print("Error running [git ls-remote] command")
+        print(e)
+        return False
+
+def get_access_token_bruteforce(repo_url):
+    config = get_config()
+    bb_tokens_dict = dict(config['bitbucket_tokens'])
+    for key in list(bb_tokens_dict.keys()):
+        if "token_name_" in key:
+            tv = key.replace("token_name_", "token_value_")
+            access_token = bb_tokens_dict[tv]
+            if check_access_token(repo_url, access_token):
+                return access_token
+    return None
+
+def get_access_token(repo_url, at_index):
+    config = get_config()
+    if not config.has_section('bitbucket_tokens_cache'):
+        config.add_section('bitbucket_tokens_cache')
+        write_config(config)
+
+    at_cache = dict(config['bitbucket_tokens_cache'])
+    access_token = at_cache.get(at_index)
+    if access_token is None:
+        access_token = get_access_token_bruteforce(repo_url)
+        if access_token is None:
+            # This is bad, seems like there is no access token corresponding to this repo_url
+            print("Error unable to find working access token for repo [%s]" % repo_url)
+            return None
+        update_access_token_cache(at_index, access_token)
+        return access_token
+
+    # It is possible that the cached access token is stale i.e. it has been updated
+    if check_access_token(repo_url, access_token):
+        return access_token
+    else:
+        access_token = get_access_token_bruteforce(repo_url)
+        if access_token is None:
+            # This is bad, seems like there is no access token corresponding to this repo_url
+            print("Error unable to find working access token for repo [%s]" % repo_url)
+            return None
+        update_access_token_cache(at_index, access_token)
+        return access_token
+
+def discover_repo(repo_url, asset_id, branch, accesstoken_index):
     config = get_config()
 
     bitbucket_user = config['bitbucket_app']['bitbucket_user']
-    bitbucket_access_token = config['bitbucket_app']['bitbucket_access_token']
+    bitbucket_access_token = get_access_token(repo_url, accesstoken_index)
+    if bitbucket_access_token is None:
+        print("Error unable to discover repo [%s] due to absence of valid access token" % repo_url)
+        return
     updated_repo_url = "https://" + bitbucket_user + ":" + bitbucket_access_token + '@' + repo_url.split('//')[1]
 
     handle = config['threatworx']['handle']

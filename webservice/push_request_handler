@@ -53,11 +53,14 @@ if base_branch is None:
 repo_url = event_data['repository']['links']['html']['href']
 repo_full_name = event_data['repository']['full_name']
 asset_id = repo_full_name.replace('/','_')
+config = utils.get_config()
+# Note use underscore as separate since colon ':' is a delimiter in INI files
+at_index = "%s_%s_%s" % (event_data['repository']['workspace']['name'], event_data['repository']['project']['name'], event_data['repository']['name'])
 
 print("Handling push webhook for repo [%s]" % repo_full_name)
 
 # Discover and scan asset
-ret_val = utils.discover_repo(repo_url, asset_id, base_branch) 
+ret_val = utils.discover_repo(repo_url, asset_id, base_branch, at_index) 
 
 if ret_val == False:
     print("Error while discovering asset for branch [%s]" % base_branch)

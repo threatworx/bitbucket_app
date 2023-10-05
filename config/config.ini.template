@@ -15,10 +15,6 @@ bitbucket_host = bitbucket.org
 # Specify user depending on type of authentication
 bitbucket_user = x-token-auth
 
-# Depending on type of authentication to be used this could be
-# {Repository / Project / Workspace} Access Token
-bitbucket_access_token = BITBUCKET_ACCESS_TOKEN 
-
 # Used to tag repository assets reported to ThreatWorx console upon discovery
 user_tags = 
 
@@ -41,3 +37,5 @@ code_sharing = false
 discovery_concurrency = 4
 setup_done = false 
 
+[bitbucket_tokens]
+# list of user supplied tokens for Bitbucket workspaces, projects or repositories

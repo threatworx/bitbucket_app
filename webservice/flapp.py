@@ -51,18 +51,24 @@ def handle_save_bitbucket_app_config():
     iac_enabled = request.values.get('iac_enabled')
     secrets_enabled = request.values.get('secrets_enabled')
     code_sharing_enabled = request.values.get('code_sharing_enabled')
-    tw_bb_access_token = request.values.get('tw_bb_access_token')
     tw_user_tags = request.values.get('tw_user_tags')
     config['threatworx']['handle'] = tw_handle
     config['threatworx']['token'] = tw_api_key
     config['threatworx']['instance'] = tw_instance
-    config['bitbucket_app']['bitbucket_access_token'] = tw_bb_access_token
     config['bitbucket_app']['user_tags'] = tw_user_tags
     config['bitbucket_app']['sast_checks_enabled'] = 'true' if sast_enabled == 'yes' else 'false'
     config['bitbucket_app']['iac_checks_enabled'] = 'true' if iac_enabled == 'yes' else 'false'
     config['bitbucket_app']['secrets_checks_enabled'] = 'true' if secrets_enabled == 'yes' else 'false'
     config['bitbucket_app']['code_sharing'] = 'true' if code_sharing_enabled == 'yes' else 'false'
     config['bitbucket_app']['setup_done'] = 'true'
+
+    if not config.has_section('bitbucket_tokens'):
+        config.add_section('bitbucket_tokens') 
+
+    for a in request.values:
+        if 'token_value_' in a or 'token_name_' in a:
+            config['bitbucket_tokens'][a] = request.values.get(a)
+
     utils.write_config(config)
     config = utils.get_config(True)
 
