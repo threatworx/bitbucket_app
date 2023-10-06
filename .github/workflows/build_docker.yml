@@ -32,4 +32,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: threatworx/bitbucket_app_server:$TAG , threatworx/bitbucket_app_server:latest
+          tags: threatworx/bitbucket_app_server:${{ TAG }}, threatworx/bitbucket_app_server:latest
