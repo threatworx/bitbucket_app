@@ -13,7 +13,7 @@ config = None
 GoDaddyCABundle = True
 CONFIG_FILE = '/opt/tw_bitbucket_app/config/config.ini'
 
-def get_config(force_read = False):
+def get_config(force_read = False, obtain_lock = True):
     global config
     if force_read == False and config is not None:
         return config
@@ -32,23 +32,30 @@ def get_config(force_read = False):
         print("Error configuration file [%s] not found" % CONFIG_FILE)
         sys.exit(1)
     config = configparser.ConfigParser()
-    lock = FileLock(CONFIG_FILE + ".lock")
-    with lock:
+    if obtain_lock:
+        lock = FileLock(CONFIG_FILE + ".lock")
+        with lock:
+            config.read(CONFIG_FILE)
+    else:
         config.read(CONFIG_FILE)
     return config
 
-def write_config(config):
-    lock = FileLock(CONFIG_FILE + ".lock")
-    with lock:
+def write_config(config, obtain_lock = True):
+    if obtain_lock:
+        lock = FileLock(CONFIG_FILE + ".lock")
+        with lock:
+            with open(CONFIG_FILE, 'w') as fd:
+                config.write(fd)
+    else:
         with open(CONFIG_FILE, 'w') as fd:
             config.write(fd)
 
 def update_access_token_cache(at_index, access_token):
     lock = FileLock(CONFIG_FILE + ".lock")
     with lock:
-        config = get_config(True)
+        config = get_config(True, False)
         config['bitbucket_tokens_cache'][at_index] = access_token
-        write_config(config)
+        write_config(config, False)
 
 def check_access_token(repo_url, bitbucket_access_token):
     config = get_config()
