@@ -181,7 +181,7 @@ def discover_repo(repo_url, asset_id, branch, accesstoken_index):
         
     # Perform secrets checks if enabled
     if secrets_checks_enabled:
-        twigs_cmd = "twigs -v %s --handle '%s' --token '%s' --instance '%s' %s --create_empty_asset --no_scan --run_id bitbucket_app repo --repo '%s' --assetid '%s' --assetname '%s' --secrets_scan" % (insecure, handle, token, instance, ptags, updated_repo_url, asset_id, asset_id)
+        twigs_cmd = "twigs -v %s --handle '%s' --token '%s' --instance '%s' %s --create_empty_asset --no_scan --run_id bitbucket_app repo --repo '%s' --assetid '%s' --assetname '%s' --secrets_scan --check_common_passwords" % (insecure, handle, token, instance, ptags, updated_repo_url, asset_id, asset_id)
         if branch is not None:
             twigs_cmd = twigs_cmd + " --branch '%s'" % branch
         if code_sharing == False:
